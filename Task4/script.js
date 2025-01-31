@@ -1,70 +1,102 @@
+// Створюємо класи для валідації
+class Validator {
+    validate(value) {
+        throw new Error("validate() must be implemented.");
+    }
+}
+
+class UsernameValidator extends Validator {
+    validate(value) {
+        return value.length >= 3;
+    }
+}
+
+class EmailValidator extends Validator {
+    validate(value) {
+        return /^\S+@\S+\.\S+$/.test(value);
+    }
+}
+
+class PasswordValidator extends Validator {
+    validate(value) {
+        return (value.match(/1/g) || []).length >= 6;
+    }
+}
+
+// Клас для обробки форми
 class Form {
     constructor(containerId, fields, onSubmit) {
         this.container = document.getElementById(containerId);
-        // Поля форми
         this.fields = fields;
-        // Функція-обробник для відправки форми
         this.onSubmit = onSubmit;
         this.form = document.createElement('form');
         this.container.appendChild(this.form);
         this.renderFields();
         this.addSubmitButton();
     }
-    // Метод для створення та відображення полів форми
+
     renderFields() {
-        let self = this;
-        this.fields.forEach(function (field) {
+        this.fields.forEach((field) => {
             let input = document.createElement('input');
-            input.type = field.type || 'text'; // Тип поля (текст за замовчуванням)
-            input.name = field.name; // Ім'я поля
+            input.type = field.type || 'text';
+            input.name = field.name;
             input.placeholder = field.placeholder || '';
             input.required = field.required || false;
             input.classList.add(field.name);
-            // Додаємо поле до форми
-            self.form.appendChild(input);
+            this.form.appendChild(input);
         });
     }
-    // Метод для створення кнопки відправки форми
+
     addSubmitButton() {
         let button = document.createElement('button');
         button.type = 'button';
         button.textContent = 'Submit';
         this.form.appendChild(button);
-        // Додаємо обробник події для натискання на кнопку
-        button.addEventListener('click', this.handleSubmit.bind(this)); // Прив'язуємо контекст
+        button.addEventListener('click', this.handleSubmit.bind(this));
     }
-    // Метод для обробки відправки форми
+
     handleSubmit(event) {
-        let self = this;
-        let isValid = true; // Прапорець для перевірки валідності всіх полів
-        let data = {}; // Об'єкт для збереження даних форми
-        // Перевіряємо кожне поле на валідність
-        this.fields.forEach(function (field) {
-            let input = self.form.querySelector('.' + field.name);
+        let isValid = this.validateFields();
+        if (isValid) {
+            this.onSubmit(this.collectFormData());
+            this.form.reset();
+        }
+    }
+
+    validateFields() {
+        let isValid = true;
+        this.fields.forEach((field) => {
+            let input = this.form.querySelector('.' + field.name);
+            let validator = field.validator;
             let errorMessageElement = input.nextElementSibling;
-            // Якщо помилка вже існує, видаляємо її
             if (errorMessageElement && errorMessageElement.classList.contains('error-message')) {
                 errorMessageElement.remove();
             }
-            // Якщо поле не пройшло валідацію
-            if (field.validation && !field.validation(input.value)) {
+            if (validator && !validator.validate(input.value)) {
                 isValid = false;
                 input.classList.add('invalid');
-                // Створюємо повідомлення про помилку
-                let errorMessage = document.createElement('div');
-                errorMessage.classList.add('error-message');
-                errorMessage.textContent = field.errorMessage || 'Invalid input';
-                input.after(errorMessage);
+                this.showErrorMessage(input, field.errorMessage);
             } else {
-                // Якщо поле валідне, прибираємо некоректний клас
                 input.classList.remove('invalid');
-                data[field.name] = input.value;
             }
         });
-        if (isValid) {
-            this.onSubmit(data);
-            this.form.reset();
-        }
+        return isValid;
+    }
+
+    collectFormData() {
+        let data = {};
+        this.fields.forEach((field) => {
+            let input = this.form.querySelector('.' + field.name);
+            data[field.name] = input.value;
+        });
+        return data;
+    }
+
+    showErrorMessage(input, errorMessage) {
+        let error = document.createElement('div');
+        error.classList.add('error-message');
+        error.textContent = errorMessage || 'Invalid input';
+        input.after(error);
     }
 }
 
@@ -74,9 +106,7 @@ let form = new Form('form-container', [
         name: 'username',
         placeholder: 'Enter your username',
         required: true,
-        validation: function (value) {
-            return value.length >= 3; // Ім'я повинно бути щонайменше 3 символи
-        },
+        validator: new UsernameValidator(),
         errorMessage: 'Username must be at least 3 characters long'
     },
     {
@@ -84,9 +114,7 @@ let form = new Form('form-container', [
         placeholder: 'Enter your email',
         type: 'email',
         required: true,
-        validation: function (value) {
-            return /^\S+@\S+\.\S+$/.test(value); // Перевірка формату email
-        },
+        validator: new EmailValidator(),
         errorMessage: 'Invalid email address'
     },
     {
@@ -94,11 +122,9 @@ let form = new Form('form-container', [
         placeholder: 'Enter your password',
         type: 'password',
         required: true,
-        validation: function (value) {
-            return (value.match(/1/g) || []).length >= 6; // Пароль повинен містити щонайменше 6 одиниць
-        },
+        validator: new PasswordValidator(),
         errorMessage: 'Password must contain at least 6 ones (1)'
     }
 ], function (data) {
-    console.log('Form submitted:', data); // Вивід даних у консоль
+    console.log('Form submitted:', data);
 });
