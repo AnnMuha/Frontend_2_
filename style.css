@@ -1,0 +1,44 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.navbar {
+    background-color: mediumpurple;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+.menu li {
+    display: inline;
+    margin: 0 15px;
+}
+
+.menu li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.menu li a:hover {
+    color: rebeccapurple;
+}
+
+.content {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+h2 {
+    margin-top: 30px;
+    color: #333;
+}
