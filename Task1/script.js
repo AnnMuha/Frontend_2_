@@ -18,14 +18,18 @@ class Modal {
         this.initEvents();
     }
 
+    toggleVisibility(isVisible) {
+        const action = isVisible ? "remove" : "add";
+        this.modal.classList[action]("hidden");
+        this.backdrop.classList[action]("hidden");
+    }
+
     open() {
-        this.modal.classList.remove("hidden");
-        this.backdrop.classList.remove("hidden");
+        this.toggleVisibility(true);
     }
 
     close() {
-        this.modal.classList.add("hidden");
-        this.backdrop.classList.add("hidden");
+        this.toggleVisibility(false);
     }
 
     setContent(content) {
