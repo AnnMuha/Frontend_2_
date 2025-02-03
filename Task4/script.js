@@ -63,21 +63,26 @@ class Form {
         }
     }
 
+    validateField(field, input) {
+        let validator = field.validator;
+        let isValid = !validator || validator.validate(input.value);
+        let errorMessageElement = input.nextElementSibling;
+        if (errorMessageElement && errorMessageElement.classList.contains('error-message')) {
+            errorMessageElement.remove();
+        }
+        input.classList.toggle('invalid', !isValid);
+        if (!isValid) {
+            this.showErrorMessage(input, field.errorMessage);
+        }
+        return isValid;
+    }
+
     validateFields() {
         let isValid = true;
-        this.fields.forEach((field) => {
+        this.fields.forEach(field => {
             let input = this.form.querySelector('.' + field.name);
-            let validator = field.validator;
-            let errorMessageElement = input.nextElementSibling;
-            if (errorMessageElement && errorMessageElement.classList.contains('error-message')) {
-                errorMessageElement.remove();
-            }
-            if (validator && !validator.validate(input.value)) {
+            if (!this.validateField(field, input)) {
                 isValid = false;
-                input.classList.add('invalid');
-                this.showErrorMessage(input, field.errorMessage);
-            } else {
-                input.classList.remove('invalid');
             }
         });
         return isValid;
