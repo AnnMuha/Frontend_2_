@@ -101,30 +101,21 @@ class Form {
 }
 
 // Використання класу
-let form = new Form('form-container', [
-    {
-        name: 'username',
-        placeholder: 'Enter your username',
-        required: true,
-        validator: new UsernameValidator(),
-        errorMessage: 'Username must be at least 3 characters long'
-    },
-    {
-        name: 'email',
-        placeholder: 'Enter your email',
-        type: 'email',
-        required: true,
-        validator: new EmailValidator(),
-        errorMessage: 'Invalid email address'
-    },
-    {
-        name: 'password',
-        placeholder: 'Enter your password',
-        type: 'password',
-        required: true,
-        validator: new PasswordValidator(),
-        errorMessage: 'Password must contain at least 6 ones (1)'
+class FieldConfig {
+    constructor(name, placeholder, type = 'text', validator = null, required = true, errorMessage = 'Invalid input') {
+        this.name = name;
+        this.placeholder = placeholder;
+        this.type = type;
+        this.validator = validator;
+        this.required = required;
+        this.errorMessage = errorMessage;
     }
+}
+
+let form = new Form('form-container', [
+    new FieldConfig('username', 'Enter your username', 'text', new UsernameValidator(), true, 'Username must be at least 3 characters long'),
+    new FieldConfig('email', 'Enter your email', 'email', new EmailValidator(), true, 'Invalid email address'),
+    new FieldConfig('password', 'Enter your password', 'password', new PasswordValidator(), true, 'Password must contain at least 6 ones (1)')
 ], function (data) {
     console.log('Form submitted:', data);
 });
